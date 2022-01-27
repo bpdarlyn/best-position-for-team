@@ -61,7 +61,7 @@ def remove_duplicate_team(team_matches):
     return unique
 
 
-def play_matches(team_to_verify, teams, original_position_table, total_matches, comb=[], best_table_positions=[]):
+def play_matches(team_to_verify, teams, original_position_table, match_day, total_matches, comb=[], best_table_positions=[]):
     if len(comb) == total_matches:
         # Ya jugaron todos ?
         new_table_position = build_table_position(original_position_table, comb)
@@ -70,7 +70,7 @@ def play_matches(team_to_verify, teams, original_position_table, total_matches, 
 
         if after_position_team_to_verify <= before_position_team_to_verify:
             if not exist_table_position(new_table_position, best_table_positions):
-                best_table_positions.append({
+                return best_table_positions.append({
                     'matches': comb.copy(),
                     'table_positions': new_table_position.copy()
                 })
@@ -81,7 +81,15 @@ def play_matches(team_to_verify, teams, original_position_table, total_matches, 
         team_a, team_b, _ = current_team_match
         if current_team_match not in comb and find_by_team(team_a, team_b, comb) is None:
             comb.append(current_team_match)
-            play_matches(team_to_verify, teams, original_position_table, total_matches, comb)
+            play_matches(
+                team_to_verify,
+                teams,
+                original_position_table,
+                match_day,
+                total_matches,
+                comb,
+                best_table_positions
+            )
             team_match = comb.pop()
             comb = remove_duplicate_team(comb)
 
@@ -141,7 +149,14 @@ def evaluate_team(team_to_verify, original_position_table, matches, results):
     position_table = original_position_table.copy()
     for match_day, team_matches in group_match.items():
         group_with_result = group_and_order_by_result(team_matches, results)
-        best_table_positions = play_matches(team_to_verify, group_with_result, position_table, len(team_matches))
+        best_table_positions = play_matches(team_to_verify,
+                                            group_with_result,
+                                            position_table,
+                                            match_day,
+                                            len(team_matches),
+                                            [],
+                                            []
+                                            )
         current_position_index = list(position_table.keys()).index(team_to_verify)
         match_results = None
         for current_table_position in best_table_positions:
@@ -154,6 +169,14 @@ def evaluate_team(team_to_verify, original_position_table, matches, results):
         simulated_position_index = list(position_table.keys()).index(team_to_verify)
 
         print(build_msg_for_match(match_day, match_results, simulated_position_index + 1, team_to_verify))
+    print(build_msg_for_position_table(position_table))
+
+
+def build_msg_for_position_table(position_table):
+    msg = []
+    for team, team_info in position_table.items():
+        msg.append(f"{team}: {team_info[-1]} pts")
+    return "Tabla de Posiciones Final \n" + "\n".join(msg)
 
 
 def build_msg_for_match(match, match_results, position, team):
@@ -200,7 +223,7 @@ def group_and_order_by_result(team_matches, results):
 
 
 if __name__ == "__main__":
-    team_to_verify = 'Bolivia'
+    team_to_verify = 'Paraguay'
     initial_position_table = current_position_table.copy()
     if team_to_verify in initial_position_table:
         matches = next_matches
