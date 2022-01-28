@@ -2,13 +2,13 @@
 
 current_position_table = {
     # Team, PJ, DGs, PTs
-    'Brasil': (13, 23, 35),
-    'Argentina': (13, 14, 29),
-    'Ecuador': (14, 10, 23),
+    'Brasil': (13, 23, 36),
+    'Argentina': (13, 14, 32),
+    'Ecuador': (14, 10, 24),
+    'Uruguay': (14, -7, 19),
     'Colombia': (14, -1, 17),
     'Peru': (14, -5, 17),
     'Chile': (14, -1, 16),
-    'Uruguay': (14, -7, 16),
     'Bolivia': (14, -8, 15),
     'Paraguay': (14, -9, 13),
     'Venezuela': (14, -16, 7),
@@ -16,9 +16,6 @@ current_position_table = {
 
 next_matches = (
     # Match, Team vs Team
-    (15, ('Ecuador', 'Brasil')),
-    (15, ('Paraguay', 'Uruguay')),
-    (15, ('Chile', 'Argentina')),
     (15, ('Colombia', 'Peru')),
     (15, ('Venezuela', 'Bolivia')),
     (16, ('Bolivia', 'Chile')),
@@ -161,10 +158,15 @@ def evaluate_team(team_to_verify, original_position_table, matches, results):
         match_results = None
         for current_table_position in best_table_positions:
             simulated_position_index = list(current_table_position['table_positions'].keys()).index(team_to_verify)
+
             if simulated_position_index <= current_position_index:
                 # Find the best position for team_to_verify
                 position_table = current_table_position['table_positions']
                 match_results = current_table_position['matches']
+
+            # if simulated_position_index < current_position_index:
+            #     # Print all possibilities
+            #     print(build_msg_for_match(match_day, match_results, simulated_position_index + 1, team_to_verify))
 
         simulated_position_index = list(position_table.keys()).index(team_to_verify)
 
@@ -223,7 +225,7 @@ def group_and_order_by_result(team_matches, results):
 
 
 if __name__ == "__main__":
-    team_to_verify = 'Paraguay'
+    team_to_verify = 'Bolivia'
     initial_position_table = current_position_table.copy()
     if team_to_verify in initial_position_table:
         matches = next_matches
